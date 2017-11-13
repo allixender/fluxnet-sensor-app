@@ -1,0 +1,28 @@
+{
+  "request": "GetObservation",
+  "service": "SOS",
+  "version": "2.0.0",
+  "procedure": [
+    "temperature-sensor"
+  ],
+  "offering": [
+    "1"
+  ],
+  "observedProperty": [
+    "temperature"
+  ],
+  "featureOfInterest": [
+    "soontaga-station-1"
+  ],
+  "temporalFilter": [
+    {
+      "during": {
+        "ref": "om:phenomenonTime",
+        "value": [
+          "2017-11-03T14:00:00+01:00",
+          "2017-11-05T14:05:00+01:00"
+        ]
+      }
+    }
+  ]
+}

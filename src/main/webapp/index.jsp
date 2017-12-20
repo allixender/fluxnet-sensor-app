@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+
     <script type="application/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
     <!-- Latest compiled and minified CSS -->

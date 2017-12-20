@@ -344,21 +344,24 @@
 
 <div class="container-fluid">
 
-    <div class="col-sm-3 col-md-2">
-        <div id="map" class="map map-home" style="height: 300px; width: 300px; margin-top: 50px"></div>
+    <div class="row">
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div id="map" class="map map-home" style="height: 300px; width: 300px; margin-top: 50px"></div>
+        </div>
+
+        <div role="main" class="col-lg-9 col-md-10 col-sm-12 starter-template">
+            <h2>Soontaga Temperature!</h2>
+
+            <svg width="800" height="500"></svg>
+
+            <p class="lead">Prototype: Demo loading latest 48h temperate data from LoggerNet database via <a
+                    href="http://www.opengeospatial.org/standards/sos" target="_blank">OGC SOS</a> service standard.<br>
+                This is temperature, (half-)hourly averaged at Soontaga. This page reloads itself every 60 seconds.</p>
+
+
+        </div>
     </div>
 
-    <div role="main" class="col-sm-9 col-md-10 starter-template">
-        <h2>Soontaga Temperature!</h2>
-
-        <svg width="960" height="500"></svg>
-
-        <p class="lead">Prototype: Demo loading latest 48h temperate data from LoggerNet database via <a
-                href="http://www.opengeospatial.org/standards/sos" target="_blank">OGC SOS</a> service standard.<br>
-            This is temperature, (half-)hourly averaged at Soontaga. This page reloads itself every 60 seconds.</p>
-
-
-    </div>
 
 </div><!-- /.container -->
 

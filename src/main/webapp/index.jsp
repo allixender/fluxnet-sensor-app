@@ -7,7 +7,6 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
 
     <script type="application/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
@@ -32,19 +31,6 @@
 
         .starter-template {
             padding: 40px 15px;
-        }
-
-        div.d3tooltip {
-            position: absolute;
-            text-align: center;
-            width: 120px;
-            height: 50px;
-            padding: 2px;
-            font: 11px sans-serif;
-            background: lightsteelblue;
-            border: 0px;
-            border-radius: 4px;
-            pointer-events: none;
         }
 
         .leafletGlyphIcon {
@@ -98,17 +84,12 @@
     <script type="application/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.js"></script>
 
-    <script type="application/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/locale/et.js"></script>
-
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <!-- For Geochart and Map Chart, you must load both the old library loader and the new library loader.
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     -->
     <script type="text/javascript">
-        moment.locale('et');
-        // console.log(moment.locale());
 
         var now = moment();
         // console.log(now.format());
@@ -185,17 +166,17 @@
                     // data.observations.result.value -> number
 
                     console.log('loaded ' + data.observations.length + ' observation');
-                    console.log(JSON.stringify(data.observations));
+                    // console.log(JSON.stringify(data.observations));
 
                     jQuery.each(data.observations, function (i, val) {
-                        console.log(JSON.stringify([strictIsoParse(val.phenomenonTime), val.result.value]));
+                        // console.log(JSON.stringify([strictIsoParse(val.phenomenonTime), val.result.value]));
                         obsarray.push([strictIsoParse(val.phenomenonTime), roundSignal2(val.result.value)]);
                     });
 
                     var tableData = google.visualization.arrayToDataTable(obsarray);
 
                     var options = {
-                        title: 'Soontaga Temperature',
+                        // title: 'Soontaga Temperature',
                         hAxis: {
                             title: 'Time'
                         },
@@ -204,226 +185,19 @@
                         },
                         colors: ['#AB0D06'],
                         trendlines: {
-                            0: {type: 'exponential', color: '#333', opacity: .7}
+                            0: {type: 'exponential', color: '#333', opacity: .5}
                         }
                     };
 
                     var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
                     chart.draw(tableData, options);
+
+                    // var csv = google.visualization.dataTableToCsv(tableData);
+                    // console.log(csv);
                 }
             });
         }
     </script>
-
-    <!--
-    <script>
-        moment.locale('et');
-        // console.log(moment.locale());
-
-        var now = moment();
-        // console.log(now.format());
-
-        var utcnow = moment.utc();
-        console.log(utcnow.format());
-
-        var before = moment.utc().subtract(2, 'days');
-        // console.log(before.format());
-
-        const sosurl = 'http://ltom-loggernet.domenis.ut.ee:8081/sos/service/json';
-
-        const sosrequest = {
-            "request": "GetObservation",
-            "service": "SOS",
-            "version": "2.0.0",
-            "procedure": [
-                "temperature-sensor"
-            ],
-            "offering": [
-                "1"
-            ],
-            "observedProperty": [
-                "temperature"
-            ],
-            "featureOfInterest": [
-                "soontaga-station-1"
-            ],
-            "temporalFilter": [
-                {
-                    "during": {
-                        "ref": "om:phenomenonTime",
-                        "value": [
-                            before.format(),
-                            utcnow.format()
-                        ]
-                    }
-                }
-            ]
-        };
-
-        // the data
-        var obsarray = [];
-
-        var formatTime = d3.timeFormat("%d.%m., %H:%Mh");
-
-        /**
-         * On document ready
-         */
-        $(document).ready(function () {
-
-            var mydiv = d3.select("body").append("div")
-                .attr("class", "d3tooltip")
-                .attr("id", "mydiv")
-                .style("opacity", 0);
-
-            var svg = d3.select("svg"),
-                margin = {top: 20, right: 20, bottom: 30, left: 50},
-                width = +svg.attr("width") - margin.left - margin.right,
-                height = +svg.attr("height") - margin.top - margin.bottom,
-                g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-            // 2017-11-07T15:15:28Z
-            // 2017-11-07T16:30:00.000Z
-            // var parseTimeN52Req = d3.timeParse("%Y-%m-%dT%H:%M:%sZ");
-            // var parseTimeN52Obs = d3.timeParse("%Y-%m-%dT%H:%M:%s.%LZ");
-            var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
-
-            var parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ"),
-                bisectDate = d3.bisector(function (d) {
-                    return d.date;
-                }).left,
-                formatValue = d3.format(",.2f"),
-                formatTemp = function (d) {
-                    return formatValue(d) + "C";
-                };
-
-            var x = d3.scaleTime()
-                .rangeRound([0, width]);
-
-            var y = d3.scaleLinear()
-                .rangeRound([height, 0]);
-
-            var line = d3.line()
-                .x(function (d) {
-                    return x(d.date);
-                })
-                .y(function (d) {
-                    return y(d.temp);
-                });
-
-            console.log("loading sos data!");
-
-            d3.request(sosurl)
-                .header("Content-Type", "application/json")
-                .mimeType("application/json")
-                .response(function (xhr) {
-                    return JSON.parse(xhr.responseText);
-                })
-                .post(JSON.stringify(sosrequest), function (error, data) {
-
-                    // data.observations.phenomenonTime -> parseTime
-                    // data.observations.result.value -> number
-
-                    console.log('loaded ' + data.observations.length + ' observation');
-
-                    jQuery.each(data.observations, function (i, val) {
-                        // console.log(JSON.stringify({date: strictIsoParse(val.phenomenonTime), temp: val.result.value}));
-                        obsarray.push({date: strictIsoParse(val.phenomenonTime), temp: val.result.value});
-                    });
-
-
-                    if (error) throw error;
-
-                    x.domain(d3.extent(obsarray, function (d) {
-                        return d.date;
-                    }));
-                    y.domain(d3.extent(obsarray, function (d) {
-                        return d.temp;
-                    }));
-
-                    g.append("g")
-                        .attr("transform", "translate(0," + height + ")")
-                        .call(d3.axisBottom(x))
-                        .select(".domain")
-                        .remove();
-
-                    g.append("g")
-                        .call(d3.axisLeft(y))
-                        .append("text")
-                        .attr("fill", "#000")
-                        .attr("transform", "rotate(-90)")
-                        .attr("y", 6)
-                        .attr("dy", "0.81em")
-                        .attr("text-anchor", "end")
-                        .text("Temperature (C)");
-
-                    var path = g.append("path")
-                        .datum(obsarray)
-                        .attr("fill", "none")
-                        .attr("stroke", "orange")
-                        .attr("stroke-linejoin", "round")
-                        .attr("stroke-linecap", "round")
-                        .attr("stroke-width", 1.5)
-                        .attr("d", line);
-
-                    var legendData = [{name: 'Temp in C', color: 'orange'}];
-
-                    var legend = svg.append("g")
-                        .data(legendData)
-                        .attr('class', 'legend');
-
-                    legend.append('rect')
-                        .attr('x', width - 20)
-                        .attr('y', function (d, i) {
-                            return i * 20;
-                        })
-                        .attr('width', 10)
-                        .attr('height', 10)
-                        .style('fill', function (d) {
-                            // return color(d.color);
-                            return 'orange';
-                        });
-
-                    legend.append('text')
-                        .attr('x', width - 8)
-                        .attr('y', function (d, i) {
-                            return (i * 20) + 9;
-                        })
-                        .text(function (d) {
-                            return 'Temperature in &deg;C';
-                        });
-
-                    path.on("mouseover", function () {
-                        var x0 = x.invert(d3.mouse(this)[0]),
-                            i = bisectDate(obsarray, x0, 1),
-                            d0 = obsarray[i - 1],
-                            d1 = obsarray[i],
-                            d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-
-                        var xCoor = d3.mouse(this)[0]; // mouse position in x
-                        var yValue = y.invert(xCoor); // value of y axis
-                        var xDate = x.invert(xCoor); // date corresponding to mouse x
-
-                        var textStuff = Number(d.temp).toFixed(2) + '&deg;C on ' + formatTime(d.date);
-
-                        // console.log(textStuff);
-                        mydiv.transition()
-                            .duration(100)
-                            .style("opacity", .9);
-
-                        mydiv.html(textStuff)
-                            .style("left", (d3.event.pageX) + "px")
-                            .style("top", (d3.event.pageY - 50) + "px");
-                    })
-                        .on("mouseout", function () {
-                            mydiv.transition()
-                                .duration(500)
-                                .style("opacity", 0);
-                        });
-
-                });
-        });
-    </script>
-    -->
 
     <meta http-equiv="refresh" content="60">
 
@@ -450,9 +224,7 @@
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Test</a></li>
-                    <li><a href="#about">Test</a></li>
-                    <li><a href="#contact">Test</a></li>
+                    <li class="active"><a href="#">Temperature</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
@@ -467,10 +239,9 @@
         </div>
 
         <div role="main" class="col-lg-9 col-md-10 col-sm-12 starter-template">
-            <h2>Soontaga Temperature</h2>
+            <!-- <h2>Soontaga Temperature</h2> -->
 
-            <!-- <svg width="800" height="450"></svg> -->
-            <!--Div that will hold the pie chart-->
+            <!--Div that will hold the  chart-->
             <div id="chart_div"></div>
 
             <p class="lead">Prototype: Demo loading latest 48h temperate data from LoggerNet database via <a

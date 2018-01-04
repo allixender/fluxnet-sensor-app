@@ -7,6 +7,7 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
 
     <script type="application/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
@@ -46,17 +47,18 @@
             pointer-events: none;
         }
 
-        .leafletGlyphIcon{
-            border:1px solid #555;
-            width:100%;
-            margin:5px;
+        .leafletGlyphIcon {
+            border: 1px solid #555;
+            width: 100%;
+            margin: 5px;
         }
-        .leafletGlyphIcon:before{
-            content:"\e062";
-            font-family:"Glyphicons Halflings";
-            // line-height:1;
-            margin:5px;
-            display:inline-block;
+
+        .leafletGlyphIcon:before {
+            content: "\e062";
+            font-family: "Glyphicons Halflings";
+        / / line-height: 1;
+            margin: 5px;
+            display: inline-block;
         }
     </style>
 
@@ -100,6 +102,120 @@
             src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/locale/et.js"></script>
 
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- For Geochart and Map Chart, you must load both the old library loader and the new library loader.
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    -->
+    <script type="text/javascript">
+        moment.locale('et');
+        // console.log(moment.locale());
+
+        var now = moment();
+        // console.log(now.format());
+
+        var utcnow = moment.utc();
+        console.log(utcnow.format());
+
+        var before = moment.utc().subtract(2, 'days');
+        // console.log(before.format());
+
+        // var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
+        function strictIsoParse(dateString) {
+            // console.log(JSON.stringify(moment.utc(dateString)));
+            return moment.utc(dateString).toDate();
+        }
+
+        function roundSignal2 (numValue) {
+            return Math.round(numValue * 100) / 100;
+        }
+
+        const sosurl = 'http://ltom-loggernet.domenis.ut.ee:8081/sos/service/json';
+
+        const sosrequest = {
+            "request": "GetObservation",
+            "service": "SOS",
+            "version": "2.0.0",
+            "procedure": [
+                "temperature-sensor"
+            ],
+            "offering": [
+                "1"
+            ],
+            "observedProperty": [
+                "temperature"
+            ],
+            "featureOfInterest": [
+                "soontaga-station-1"
+            ],
+            "temporalFilter": [
+                {
+                    "during": {
+                        "ref": "om:phenomenonTime",
+                        "value": [
+                            before.format(),
+                            utcnow.format()
+                        ]
+                    }
+                }
+            ]
+        };
+
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', {'packages': ['corechart'], 'language': 'en'});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
+
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+        function drawChart() {
+            // Create the data table.
+            $.ajax({
+                type: 'POST',
+                url: sosurl,
+                data: JSON.stringify(sosrequest),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function (data) {
+                    // the data
+                    var obsarray = [['Time', 'Temperature']];
+
+                    // data.observations.phenomenonTime -> parseTime
+                    // data.observations.result.value -> number
+
+                    console.log('loaded ' + data.observations.length + ' observation');
+                    console.log(JSON.stringify(data.observations));
+
+                    jQuery.each(data.observations, function (i, val) {
+                        console.log(JSON.stringify([strictIsoParse(val.phenomenonTime), val.result.value]));
+                        obsarray.push([strictIsoParse(val.phenomenonTime), roundSignal2(val.result.value)]);
+                    });
+
+                    var tableData = google.visualization.arrayToDataTable(obsarray);
+
+                    var options = {
+                        title: 'Soontaga Temperature',
+                        hAxis: {
+                            title: 'Time'
+                        },
+                        vAxis: {
+                            title: 'Temperature'
+                        },
+                        colors: ['#AB0D06'],
+                        trendlines: {
+                            0: {type: 'exponential', color: '#333', opacity: .7}
+                        }
+                    };
+
+                    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                    chart.draw(tableData, options);
+                }
+            });
+        }
+    </script>
+
+    <!--
     <script>
         moment.locale('et');
         // console.log(moment.locale());
@@ -307,6 +423,7 @@
                 });
         });
     </script>
+    -->
 
     <meta http-equiv="refresh" content="60">
 
@@ -350,9 +467,11 @@
         </div>
 
         <div role="main" class="col-lg-9 col-md-10 col-sm-12 starter-template">
-            <h2>Soontaga Temperature!</h2>
+            <h2>Soontaga Temperature</h2>
 
-            <svg width="800" height="500"></svg>
+            <!-- <svg width="800" height="450"></svg> -->
+            <!--Div that will hold the pie chart-->
+            <div id="chart_div"></div>
 
             <p class="lead">Prototype: Demo loading latest 48h temperate data from LoggerNet database via <a
                     href="http://www.opengeospatial.org/standards/sos" target="_blank">OGC SOS</a> service standard.<br>
@@ -392,13 +511,13 @@
         onAdd: function (map) {
             var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leafletGlyphIcon');
 
-            container.title="(Re-)Center map";
+            container.title = "(Re-)Center map";
             container.style.backgroundColor = 'white';
             container.style.width = '30px';
             container.style.height = '30px';
 
             // <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-            container.onclick = function(){
+            container.onclick = function () {
                 map.setView([home.lat, home.lng], home.zoom);
             };
             return container;
